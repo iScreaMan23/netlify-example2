@@ -1,1 +1,54 @@
-/home/iscr/docs/education/hugo-netlify.org
+#+TITLE: Hugo Netlify
+pipeline Gitlab > Hugo > Netlify
+
+* Gitlab 
+*** create an account
+the same way everything on the internet is. 
+*** ssh keygen
+Allows for secure and passwordless interaction with gitlab.  Asymmetric encryption, public/private key, diffie-helman things if you want to read more about it. 
+    https://docs.gitlab.com/ee/ssh/
+    - generate ECDSA key
+    `cd ~/.ssh`
+    `ssh-keygen -b 521 -t ed25519`
+    - name it (if you want.  I do so I know what it is.  Probably not best thing if my computer gets compromised because someone would know what it's for)
+    - add a password (if you want.  Again not most secure.)
+    - copy public key to clipboard 
+      macos: `pbcopy < ~/.ssh/YOUR_KEY_NAME_HERE.pub`
+      linux: `xclip -sel clip < ~/.ssh/YOUR_KEY_NAME_HERE.pub`
+    - *STOP VERY IMPORTANT* Be sure you copied your public key and not your private one! Your public key ends in .pub
+    - go to https://gitlab.com >settings>ssh keys and paste it https://gitlab.com/profile/keys if that link stays good 
+    - click add key and you're good 
+*** ssh agent
+https://www.backarapper.com/add-ssh-keys-to-ssh-agent-on-startup-in-macos/
+    when gitlab tries to send you something using the public key, you need to know where to find the associated private key.  This is what ssh-agent is for.  On macos in terminal:
+    `ssh-add -K ~/.ssh/YOUR_KEY_NAME_HERE
+This time this is your private key.
+then edit/create `~/.ssh/config` with the following
+```
+Host *
+  UseKeychain yes
+  AddKeysToAgent yes
+  IdentityFile ~/.ssh/YOUR_KEY_NAME_HERE
+```
+Alternatively a config file way w/o ssh-agent (it should work, but things be dumb and I'm lazy and don't want to troubleshoot it):
+```
+Host gitlab.com
+  Preferredauthentications publickey
+  IdentityFile ~/.ssh/YOUR_KEY_NAME_HERE
+```
+The real reason you'd want to use ssh-agent is that it allows you to use a password on your key and not have to enter it every time. But security stuff whatever.  It's still way better than shitty passwords in web browsers.  Even better is just to use a yubikey and that's what I'll do eventually when not lazy
+*** on gitlab.com
+    1. Go to https://gitlab.com/dashboard/projects and create a new project. 
+    2. Click on 'Create from template'
+    3. Click on 'Use template' for  'Netlify/Hugo'
+    4. Do paperwork things and fill in information
+    5. (optional/later) Make it public and choose a not douchebag license. I'm a CC/GPLv3 kinda guy.
+    6. Clone to work on locally (using ssh because we set that up otherwise you can use https and a username/password)
+* Netlify
+ - login with gitlab
+ - create new site and pick the correct repo
+ - You'll get a free/garbo-y looking url for now.  You can get a domain name and set up https stuff w/ namecheap later
+* Doing all this stuff w/ vs code
+ - later because nap stuff
+* Hugo 
+ish? there's a default build on netlifly.  There's probably rate limiting for free and you don't really want to have to commit every single change to see how things are working so there's some stuff to do for working locally, but that will be  later because lazy. 
